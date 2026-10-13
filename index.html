@@ -19,11 +19,25 @@
       <div class="avatar" aria-hidden="true">지</div>
       <div class="who">
         <b>지수</b>
-        <span>27살 · 출판사 편집자</span>
+        <span id="profile"></span>
       </div>
       <span class="progress" id="progress" aria-label="진행 상황"></span>
-      <button class="restart" id="restart" type="button">다시 하기</button>
+      <button class="restart" id="restart" type="button">상대 바꾸기</button>
     </header>
+
+    <section class="setup" id="setup">
+      <h1>오늘의 소개팅 상대</h1>
+      <p>지수의 직업과 MBTI를 골라주세요. 고르지 않으면 무작위로 정해져요.</p>
+      <fieldset>
+        <legend>직업</legend>
+        <div class="chips" id="jobChips"></div>
+      </fieldset>
+      <fieldset>
+        <legend>MBTI</legend>
+        <div class="chips mbti" id="mbtiChips"></div>
+      </fieldset>
+      <button class="choice again" id="startBtn" type="button">소개팅 시작하기</button>
+    </section>
 
     <section class="chat" id="chat" aria-live="polite"></section>
 
