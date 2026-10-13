@@ -11,8 +11,10 @@ const choices = document.getElementById("choices");
 const progress = document.getElementById("progress");
 const profile = document.getElementById("profile");
 const meter = document.getElementById("meter");
+const avatar = document.getElementById("avatar");
+const partnerName = document.getElementById("partnerName");
 
-let partner = null; // { job: "nurse", mbti: "ISFJ" }
+let partner = null; // { name: "서연", job: "nurse", mbti: "ISFJ" }
 let round = [];     // 이번 연습에 뽑힌 질문들
 let step = 0;       // 지금 몇 번째 질문인지 (0부터)
 
@@ -30,9 +32,20 @@ function pickOne(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
-// 글 속의 {mbti}, {mbtiLine} 을 지수의 MBTI로 바꿔요
+// 이름 끝 글자에 받침이 있으면 "이에요", 없으면 "예요" (서연이에요 / 지수예요)
+function withIeyo(name) {
+  const code = name.charCodeAt(name.length - 1) - 0xac00;
+  const hasBatchim = code >= 0 && code <= 11171 && code % 28 !== 0;
+  return name + (hasBatchim ? "이에요" : "예요");
+}
+
+// 글 속의 {name}, {nameIs}, {mbti}, {mbtiLine} 을 지금 상대 정보로 바꿔요
 function fill(text) {
-  return text.replaceAll("{mbti}", partner.mbti).replaceAll("{mbtiLine}", MBTI[partner.mbti]);
+  return text
+    .replaceAll("{nameIs}", withIeyo(partner.name))
+    .replaceAll("{name}", partner.name)
+    .replaceAll("{mbtiLine}", MBTI[partner.mbti])
+    .replaceAll("{mbti}", partner.mbti);
 }
 
 // ── 상대 고르기 화면 ──
@@ -64,16 +77,22 @@ function showSetup() {
   choices.hidden = true;
   progress.textContent = "";
   meter.style.width = "0";
+  avatar.textContent = "♥";
+  partnerName.textContent = "소개팅 상대";
   profile.textContent = "오늘의 소개팅 상대를 골라주세요";
 }
 
 function startWithChoice() {
+  const name = chosen("name");
   const job = chosen("job");
   const mbti = chosen("mbti");
   partner = {
+    name: name === RANDOM ? pickOne(NAMES) : name,
     job: job === RANDOM ? pickOne(Object.keys(JOBS)) : job,
     mbti: mbti === RANDOM ? pickOne(Object.keys(MBTI)) : mbti,
   };
+  avatar.textContent = partner.name[0];
+  partnerName.textContent = partner.name;
   profile.textContent = "27살 · " + JOBS[partner.job] + " · " + partner.mbti;
   start();
 }
@@ -112,12 +131,12 @@ function addCoach(option) {
   labelText.textContent = "코치 · " + GRADE_LABEL[option.grade];
   label.appendChild(labelText);
   const tip = document.createElement("span");
-  tip.textContent = option.tip;
+  tip.textContent = fill(option.tip);
   el.append(label, tip);
   scrollDown();
 }
 
-// 지수가 "입력 중…"을 잠깐 보여준 뒤 말하기
+// 상대가 "입력 중…"을 잠깐 보여준 뒤 말하기
 function herSays(text, then) {
   const typing = add("bubble her typing", "");
   typing.setAttribute("aria-label", "입력 중");
@@ -140,7 +159,7 @@ function showChoices() {
     const btn = document.createElement("button");
     btn.className = "choice";
     btn.type = "button";
-    btn.textContent = option.say;
+    btn.textContent = fill(option.say);
     btn.onclick = () => pick(option);
     choices.appendChild(btn);
   });
@@ -157,7 +176,7 @@ function askNext() {
 // 선택지를 눌렀을 때
 function pick(option) {
   choices.innerHTML = "";
-  add("bubble me", option.say);
+  add("bubble me", fill(option.say));
   herSays(option.reply, () => {
     addCoach(option);
     step++;
@@ -194,10 +213,11 @@ function start() {
   choices.hidden = false;
   chat.innerHTML = "";
   choices.innerHTML = "";
-  add("scene", "토요일 오후 2시, 카페. 소개팅 상대 지수가 막 도착했어요.");
+  add("scene", "토요일 오후 2시, 카페. 소개팅 상대 " + partner.name + " 님이 막 도착했어요.");
   askNext();
 }
 
+makeChips("nameChips", "name", NAMES.map((name) => [name, name]));
 makeChips("jobChips", "job", Object.entries(JOBS));
 makeChips("mbtiChips", "mbti", Object.keys(MBTI).map((type) => [type, type]));
 document.getElementById("startBtn").onclick = startWithChoice;
