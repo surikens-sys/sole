@@ -10,6 +10,7 @@ const chat = document.getElementById("chat");
 const choices = document.getElementById("choices");
 const progress = document.getElementById("progress");
 const profile = document.getElementById("profile");
+const meter = document.getElementById("meter");
 
 let partner = null; // { job: "nurse", mbti: "ISFJ" }
 let round = [];     // 이번 연습에 뽑힌 질문들
@@ -62,6 +63,7 @@ function showSetup() {
   chat.hidden = true;
   choices.hidden = true;
   progress.textContent = "";
+  meter.style.width = "0";
   profile.textContent = "오늘의 소개팅 상대를 골라주세요";
 }
 
@@ -88,29 +90,38 @@ function makeRound() {
   return [pickOne(QUESTIONS.openers), ...middle, pickOne(QUESTIONS.closers)];
 }
 
+// 대화창을 맨 아래(가장 최근 말)로 내리기
+function scrollDown() {
+  chat.scrollTop = chat.scrollHeight;
+}
+
 // 대화창에 한 줄 추가 (글자는 textContent 로 넣어서 안전하게)
 function add(className, text) {
   const el = document.createElement("div");
   el.className = className;
   el.textContent = text;
   chat.appendChild(el);
-  chat.scrollTop = chat.scrollHeight;
+  scrollDown();
   return el;
 }
 
 function addCoach(option) {
   const el = add("coach " + option.grade, "");
   const label = document.createElement("strong");
-  label.textContent = "코치 · " + GRADE_LABEL[option.grade];
+  const labelText = document.createElement("b");
+  labelText.textContent = "코치 · " + GRADE_LABEL[option.grade];
+  label.appendChild(labelText);
   const tip = document.createElement("span");
   tip.textContent = option.tip;
   el.append(label, tip);
-  chat.scrollTop = chat.scrollHeight;
+  scrollDown();
 }
 
 // 지수가 "입력 중…"을 잠깐 보여준 뒤 말하기
 function herSays(text, then) {
-  const typing = add("bubble her typing", "입력 중…");
+  const typing = add("bubble her typing", "");
+  typing.setAttribute("aria-label", "입력 중");
+  typing.innerHTML = "<i></i><i></i><i></i>";
   setTimeout(() => {
     typing.remove();
     add("bubble her", fill(text));
@@ -134,10 +145,12 @@ function showChoices() {
     choices.appendChild(btn);
   });
   choices.scrollTop = 0;
+  scrollDown(); // 선택지가 생기면서 대화창이 줄어드니 다시 맨 아래로
 }
 
 function askNext() {
   progress.textContent = step + 1 + " / " + round.length;
+  meter.style.width = (step / round.length) * 100 + "%";
   herSays(round[step].her, showChoices);
 }
 
@@ -164,10 +177,12 @@ function addButton(text, className, onClick) {
 // 다 하면
 function finish() {
   progress.textContent = "끝";
+  meter.style.width = "100%";
   add("scene", "연습 끝! 다시 하면 새 질문이 무작위로 나와요.");
   choices.innerHTML = "";
   addButton("같은 상대와 다시 연습하기", "choice again", start);
   addButton("상대 바꾸기", "choice", showSetup);
+  scrollDown();
 }
 
 // 지금 상대로 처음부터 시작
