@@ -1,0 +1,153 @@
+/* 레이아웃: 휴대폰 화면 폭의 채팅방 하나. 위에 상대 소개, 가운데 대화, 아래에 선택지 */
+:root {
+  --bg: #f3f1ec;        /* 바탕 */
+  --panel: #ffffff;     /* 채팅방 */
+  --ink: #2b2a33;       /* 글자 */
+  --muted: #7a7684;     /* 흐린 글자 */
+  --line: #e4e0d8;      /* 테두리 */
+  --her: #f1eef7;       /* 상대 말풍선 */
+  --me: #3d4a8a;        /* 내 말풍선 */
+  --me-ink: #ffffff;
+  --good: #2f7d5b;      /* 코치: 좋아요 */
+  --ok: #a8671a;        /* 코치: 괜찮아요 */
+  --bad: #b8433f;       /* 코치: 아쉬워요 */
+  --display: "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --body: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17161c; --panel: #211f28; --ink: #ecebf2; --muted: #a29eae; --line: #34313d;
+    --her: #2e2b38; --me: #6f7fd0; --me-ink: #ffffff;
+    --good: #6cc59b; --ok: #e0a457; --bad: #ec8580;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  padding: 16px;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.6 var(--body);
+  display: flex;
+  justify-content: center;
+}
+
+.room {
+  width: 100%;
+  max-width: 440px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* 상단: 상대 소개 */
+.top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.avatar {
+  width: 44px; height: 44px; flex: none;
+  border-radius: 50%;
+  background: var(--her);
+  display: grid; place-items: center;
+  font: 22px var(--display);
+  color: var(--me);
+}
+.who { flex: 1; min-width: 0; }
+.who b { font: 19px var(--display); display: block; }
+.who span { font-size: 13px; color: var(--muted); }
+.progress {
+  font: 15px var(--display);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.restart {
+  font: 14px var(--body);
+  color: var(--ink);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.restart:hover { border-color: var(--muted); }
+
+/* 가운데: 대화 */
+.chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.scene {
+  align-self: center;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+.bubble {
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: 18px;
+}
+.her { align-self: flex-start; background: var(--her); border-bottom-left-radius: 6px; }
+.me  { align-self: flex-end; background: var(--me); color: var(--me-ink); border-bottom-right-radius: 6px; }
+.typing { color: var(--muted); }
+
+/* 코치 한 줄 */
+.coach {
+  align-self: stretch;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-left: 3px solid currentColor;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  border-radius: 4px 10px 10px 4px;
+}
+.coach strong { font-family: var(--display); font-weight: normal; margin-right: 6px; }
+.coach span { color: var(--ink); }
+.coach.good { color: var(--good); }
+.coach.ok   { color: var(--ok); }
+.coach.bad  { color: var(--bad); }
+
+/* 하단: 선택지 */
+.choices {
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.choices:empty { display: none; }
+.choices p { margin: 0; font-size: 13px; color: var(--muted); }
+.choice {
+  text-align: left;
+  font: 15px/1.5 var(--body);
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.choice:hover { border-color: var(--me); }
+.choice.again { text-align: center; background: var(--me); color: var(--me-ink); border-color: var(--me); }
+.choice:focus-visible, .restart:focus-visible { outline: 2px solid var(--me); outline-offset: 2px; }
+
+@media (max-width: 480px) {
+  body { padding: 0; }
+  .room { max-width: none; height: 100dvh; border: 0; border-radius: 0; }
+}
