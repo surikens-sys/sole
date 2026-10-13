@@ -1,7 +1,8 @@
 // 솔솔 소개팅 연습: 화면 동작
 // 대화 내용은 questions.js 에 있어요.
 
-const MIDDLE_COUNT = 6; // 직업·MBTI 질문 말고 중간에 무작위로 나오는 질문 수
+const MIDDLE_COUNT = 3;   // 중간에 무작위로 나오는 일반 질문 수
+const MY_FOCUS_COUNT = 2; // 내 MBTI 맞춤 질문 수 (네 글자 중 무작위)
 const GRADE_LABEL = { good: "좋아요", ok: "괜찮아요", bad: "아쉬워요" };
 const RANDOM = "random";
 
@@ -14,7 +15,7 @@ const meter = document.getElementById("meter");
 const avatar = document.getElementById("avatar");
 const partnerName = document.getElementById("partnerName");
 
-let partner = null; // { name: "서연", job: "nurse", mbti: "ISFJ" }
+let partner = null; // { name: "서연", job: "nurse", mbti: "ISFJ", myMbti: "INTP" }
 let round = [];     // 이번 연습에 뽑힌 질문들
 let step = 0;       // 지금 몇 번째 질문인지 (0부터)
 
@@ -39,13 +40,21 @@ function withIeyo(name) {
   return name + (hasBatchim ? "이에요" : "예요");
 }
 
-// 글 속의 {name}, {nameIs}, {mbti}, {mbtiLine} 을 지금 상대 정보로 바꿔요
+// 글 속의 {name}, {mbti}, {myMbti} 같은 자리를 지금 상대와 내 정보로 바꿔요
 function fill(text) {
+  const m = partner.mbti;
   return text
     .replaceAll("{nameIs}", withIeyo(partner.name))
     .replaceAll("{name}", partner.name)
-    .replaceAll("{mbtiLine}", MBTI[partner.mbti])
-    .replaceAll("{mbti}", partner.mbti);
+    .replaceAll("{mbtiLine}", MBTI[m])
+    .replaceAll("{mbti}", m)
+    .replaceAll("{traitEI}", MBTI_TRAITS[m[0]])
+    .replaceAll("{traitSN}", MBTI_TRAITS[m[1]])
+    .replaceAll("{traitTF}", MBTI_TRAITS[m[2]])
+    .replaceAll("{traitJP}", MBTI_TRAITS[m[3]])
+    .replaceAll("{myMbti}", partner.myMbti)
+    .replaceAll("{myLine}", MBTI[partner.myMbti])
+    .replaceAll("{myFirst}", partner.myMbti[0]);
 }
 
 // ── 상대 고르기 화면 ──
@@ -86,10 +95,12 @@ function startWithChoice() {
   const name = chosen("name");
   const job = chosen("job");
   const mbti = chosen("mbti");
+  const myMbti = chosen("my");
   partner = {
     name: name === RANDOM ? pickOne(NAMES) : name,
     job: job === RANDOM ? pickOne(Object.keys(JOBS)) : job,
     mbti: mbti === RANDOM ? pickOne(Object.keys(MBTI)) : mbti,
+    myMbti: myMbti === RANDOM ? pickOne(Object.keys(MBTI)) : myMbti,
   };
   avatar.textContent = partner.name[0];
   partnerName.textContent = partner.name;
@@ -99,14 +110,21 @@ function startWithChoice() {
 
 // ── 대화 진행 ──
 
-// 이번 연습에 쓸 질문 뽑기: 첫인사 1 → (직업·MBTI·중간 6개를 섞어서) → 마무리 1
+// 이번 연습에 쓸 질문 10개 뽑기
+// 첫인사 1 → (직업 1 · MBTI 2 · 내 MBTI 맞춤 2 · 중간 3 을 섞어서) → 마무리 1
+// MBTI 질문 2개는 "MBTI 뭐예요?" 다음에 후속 질문이 바로 이어지도록 한 묶음으로 섞어요.
 function makeRound() {
-  const middle = shuffle([
-    JOB_TALK[partner.job],
-    MBTI_QUESTION,
-    ...shuffle(QUESTIONS.middles).slice(0, MIDDLE_COUNT),
+  const myFocus = shuffle(partner.myMbti.split(""))
+    .slice(0, MY_FOCUS_COUNT)
+    .map((letter) => ({ ...MY_MBTI_TALK[letter], focus: letter }));
+
+  const groups = shuffle([
+    [JOB_TALK[partner.job]],
+    [MBTI_QUESTION, pickOne(MBTI_TALK)],
+    ...myFocus.map((q) => [q]),
+    ...shuffle(QUESTIONS.middles).slice(0, MIDDLE_COUNT).map((q) => [q]),
   ]);
-  return [pickOne(QUESTIONS.openers), ...middle, pickOne(QUESTIONS.closers)];
+  return [pickOne(QUESTIONS.openers), ...groups.flat(), pickOne(QUESTIONS.closers)];
 }
 
 // 대화창을 맨 아래(가장 최근 말)로 내리기
@@ -170,6 +188,8 @@ function showChoices() {
 function askNext() {
   progress.textContent = step + 1 + " / " + round.length;
   meter.style.width = (step / round.length) * 100 + "%";
+  const focus = round[step].focus;
+  if (focus) add("scene", "내 MBTI " + partner.myMbti + " 맞춤 질문 · " + focus + "형 연습");
   herSays(round[step].her, showChoices);
 }
 
@@ -214,12 +234,14 @@ function start() {
   chat.innerHTML = "";
   choices.innerHTML = "";
   add("scene", "토요일 오후 2시, 카페. 소개팅 상대 " + partner.name + " 님이 막 도착했어요.");
+  add("scene", "나는 " + partner.myMbti + " · 맞춤 질문이 섞여 나와요");
   askNext();
 }
 
 makeChips("nameChips", "name", NAMES.map((name) => [name, name]));
 makeChips("jobChips", "job", Object.entries(JOBS));
 makeChips("mbtiChips", "mbti", Object.keys(MBTI).map((type) => [type, type]));
+makeChips("myChips", "my", Object.keys(MBTI).map((type) => [type, type]));
 document.getElementById("startBtn").onclick = startWithChoice;
 document.getElementById("restart").onclick = showSetup;
 showSetup();

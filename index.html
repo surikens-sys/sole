@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
   <main class="room">
@@ -28,7 +28,7 @@
 
     <section class="setup" id="setup">
       <h1>오늘의 소개팅 상대</h1>
-      <p>상대의 이름, 직업, MBTI를 골라주세요. 고르지 않으면 무작위로 정해져요.</p>
+      <p>상대와 나의 정보를 골라주세요. 고르지 않으면 무작위로 정해져요. 내 MBTI에 맞춘 연습 질문이 섞여 나와요.</p>
       <fieldset>
         <legend>이름</legend>
         <div class="chips" id="nameChips"></div>
@@ -38,8 +38,12 @@
         <div class="chips" id="jobChips"></div>
       </fieldset>
       <fieldset>
-        <legend>MBTI</legend>
+        <legend>상대 MBTI</legend>
         <div class="chips mbti" id="mbtiChips"></div>
+      </fieldset>
+      <fieldset>
+        <legend>내 MBTI</legend>
+        <div class="chips mbti" id="myChips"></div>
       </fieldset>
       <button class="choice again" id="startBtn" type="button">소개팅 시작하기</button>
     </section>
@@ -49,7 +53,7 @@
     <section class="choices" id="choices"></section>
   </main>
 
-  <script src="questions.js?v=5"></script>
-  <script src="app.js?v=5"></script>
+  <script src="questions.js?v=6"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>
